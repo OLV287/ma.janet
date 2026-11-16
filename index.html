@@ -7,7 +7,6 @@
 
 <title>💗 Para Mae jannet ✨</title>
 
-<!-- Fuente romántica para el inicio y el mensaje oculto -->
 <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
 
 <style>
@@ -25,7 +24,7 @@ html, body {
     perspective: 1000px; 
 }
 
-/* --- PANTALLA DE INICIO --- */
+/* --- PANTALLA DE INICIO CON BOTÓN OCULTO --- */
 #inicio-overlay {
     position: fixed;
     inset: 0;
@@ -39,14 +38,30 @@ html, body {
     font-family: 'Dancing Script', cursive;
     font-size: 2.5rem;
     text-align: center;
-    cursor: pointer;
     transition: opacity 1.5s ease;
+}
+
+/* El botón transparente que cubre toda la pantalla */
+#boton-invisible {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0; /* Lo hace completamente invisible */
+    z-index: 10; /* Asegura que esté por encima del texto para recibir el toque */
+    cursor: pointer;
+    background: transparent;
+    border: none;
+    outline: none;
+    -webkit-tap-highlight-color: transparent; /* Quita el parpadeo azul al tocar en celulares */
 }
 
 #inicio-overlay p {
     text-shadow: 0 0 20px #ff69b4;
     animation: latido 2s infinite;
     padding: 20px;
+    z-index: 1; /* Queda debajo del botón invisible */
 }
 
 @keyframes latido {
@@ -60,7 +75,6 @@ html, body {
     transition: opacity 4s ease-in-out; 
 }
 
-/* --- POLVO DE ESTRELLAS --- */
 #capa-estrellas {
     position: fixed;
     inset: 0;
@@ -81,7 +95,6 @@ html, body {
     100% { opacity: 1; transform: scale(1.5); }
 }
 
-/* --- EFECTO MATRIX --- */
 .terminal {
     position: fixed;
     inset: 0;
@@ -107,7 +120,6 @@ html, body {
     100% { transform: translateY(-100%); }
 }
 
-/* --- CORAZONES FLOTANTES --- */
 .love-container {
     position: fixed;
     inset: 0;
@@ -130,7 +142,6 @@ html, body {
     100% { transform: translateY(110vh) rotate(360deg); opacity: 0; }
 }
 
-/* --- TARJETA 3D INTERACTIVA (CORREGIDA PARA LA FOTO) --- */
 .contenedor-tarjeta {
     position: fixed;
     top: 50%;
@@ -138,7 +149,6 @@ html, body {
     transform: translate(-50%, -50%);
     width: 90vw;
     max-width: 700px; 
-    /* Obliga a la tarjeta a ser siempre un rectángulo horizontal */
     aspect-ratio: 16 / 10; 
     z-index: 3;
     perspective: 1000px; 
@@ -170,23 +180,20 @@ html, body {
     overflow: hidden;
 }
 
-/* FRENTE: LA FOTO CORREGIDA */
 .cara-frente {
     display: flex;
     justify-content: center;
     align-items: center;
-    background: rgba(0, 0, 0, 0.8); /* Fondo oscuro elegante detrás de la foto */
+    background: rgba(0, 0, 0, 0.8); 
 }
 
 .cara-frente img {
     width: 100%;
     height: 100%;
-    /* contain asegura que la imagen NUNCA se recorte, mostrando todo el ancho */
     object-fit: contain; 
     border-radius: 18px;
 }
 
-/* ATRÁS: EL MENSAJE */
 .cara-atras {
     transform: rotateY(180deg);
     background: linear-gradient(135deg, rgba(20, 0, 10, 0.9), rgba(60, 0, 30, 0.9));
@@ -207,7 +214,6 @@ html, body {
     margin: 0;
 }
 
-/* --- PARTÍCULAS EXPLOSIÓN AL TOQUE --- */
 .particula-explosion {
     position: absolute;
     pointer-events: none;
@@ -236,19 +242,20 @@ html, body {
     100% { opacity: 0.9; transform: scale(1.1); }
 }
 
-/* RESPONSIVE CORREGIDO */
 @media (max-width: 768px) {
     #inicio-overlay p { font-size: 1.8rem; }
     .text-container { font-size: 16px; }
-    .contenedor-tarjeta { width: 95vw; } /* Se adapta a pantallas pequeñas manteniendo proporción horizontal */
+    .contenedor-tarjeta { width: 95vw; } 
 }
 </style>
 </head>
 
 <body>
 
-<!-- PANTALLA DE INICIO -->
+<!-- PANTALLA DE INICIO CON EL BOTÓN INVISIBLE -->
 <div id="inicio-overlay">
+    <!-- Este es el botón transparente que cubre la pantalla entera -->
+    <button id="boton-invisible"></button>
     <p>✨ Toca para ver tu sorpresa ✨</p>
 </div>
 
@@ -258,14 +265,12 @@ html, body {
 
 <div class="efecto-bloom"></div>
 
-<!-- CONTENEDORES QUE APARECEN CON FADE-IN -->
 <div id="elementos-maestros" class="elementos-fondo">
     <div id="capa-estrellas"></div>
     <div class="terminal" id="terminal"></div>
     <div class="love-container" id="loveContainer"></div>
 </div>
 
-<!-- TARJETA 3D -->
 <div class="contenedor-tarjeta" id="contenedor-tarjeta">
     <div class="tarjeta-interna" id="tarjeta-interna">
         <div class="cara cara-frente">
@@ -280,6 +285,7 @@ html, body {
 <script>
 // VARIABLES GLOBALES
 const overlay = document.getElementById('inicio-overlay');
+const botonInvisible = document.getElementById('boton-invisible');
 const audio = document.getElementById("musica");
 const elementosFondo = document.getElementById('elementos-maestros');
 const contenedorTarjeta = document.getElementById('contenedor-tarjeta');
@@ -301,15 +307,14 @@ function arrancarExperiencia() {
     }, 1500);
 }
 
-overlay.addEventListener('click', arrancarExperiencia);
-overlay.addEventListener('touchstart', arrancarExperiencia);
+// Ahora asignamos el toque directamente al botón invisible
+botonInvisible.addEventListener('click', arrancarExperiencia);
+botonInvisible.addEventListener('touchstart', arrancarExperiencia, { passive: false });
 
-// EFECTO DE GIRO DE TARJETA
 contenedorTarjeta.addEventListener('click', () => {
     tarjetaInterna.classList.toggle('volteada');
 });
 
-// EFECTO TILT 3D
 document.addEventListener('mousemove', (e) => {
     if (window.innerWidth < 768) return; 
     let xAxis = (window.innerWidth / 2 - e.pageX) / 30;
@@ -317,9 +322,9 @@ document.addEventListener('mousemove', (e) => {
     contenedorTarjeta.style.transform = `translate(-50%, -50%) rotateY(${xAxis}deg) rotateX(${yAxis}deg)`;
 });
 
-// EXPLOSIÓN AL TOQUE
 document.addEventListener('click', (e) => {
-    if (e.target.id === 'inicio-overlay' || !sistemaActivo) return;
+    // Evita estallar corazones si toca el botón inicial
+    if (e.target.id === 'boton-invisible' || !sistemaActivo) return;
     
     for (let i = 0; i < 6; i++) {
         const particula = document.createElement('div');
@@ -341,7 +346,6 @@ document.addEventListener('click', (e) => {
     }
 });
 
-// POLVO DE ESTRELLAS
 function initEstrellas() {
     const contenedorEstrellas = document.getElementById('capa-estrellas');
     for (let i = 0; i < 50; i++) {
@@ -357,7 +361,6 @@ function initEstrellas() {
     }
 }
 
-// LLUVIA MATRIX
 function initMatrix() {
     const container = document.getElementById('terminal');
     container.innerHTML = '';
@@ -385,7 +388,6 @@ function initLoveEffect() {
     }, 300); 
 }
 
-// INICIALIZACIÓN
 window.addEventListener('load', () => {
     initEstrellas();
     initMatrix();
